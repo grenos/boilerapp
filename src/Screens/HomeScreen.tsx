@@ -20,7 +20,9 @@ export const HomeScreen = () => {
 
     const allMovies = useQuery(RMovie);
 
-    const [movieId, setMovieId] = useState(0);
+    const [movieId, setMovieId] = useState(
+        parseInt(allMovies[allMovies?.length - 1].id, 10),
+    );
     // const Rmovie = useObject(RMovie, movieId.toString());
 
     // const todo = useAppSelector(selectTodo);
@@ -57,7 +59,7 @@ export const HomeScreen = () => {
             });
             setMovieId(state => state + 1);
         } catch (error) {
-            console.log('Could not save movie to realm');
+            console.log('Could not save movie to realm', error);
         }
     };
 
@@ -87,7 +89,11 @@ export const HomeScreen = () => {
             </TouchableOpacity>
 
             {allMovies.map(movie => {
-                return <CustomText font="body">{movie.title}</CustomText>;
+                return (
+                    <CustomText font="body" key={movie.id}>
+                        {movie.title}
+                    </CustomText>
+                );
             })}
         </CustomView>
     );
