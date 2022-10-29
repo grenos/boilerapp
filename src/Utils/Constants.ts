@@ -4,6 +4,7 @@ export enum Constants {
     back = 'chevron-back',
     trash = 'trash-outline',
     close = 'close-outline',
+    rightArrow = 'chevron-forward-outline',
 }
 
 export enum Api {

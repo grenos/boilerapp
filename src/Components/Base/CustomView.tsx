@@ -1,12 +1,13 @@
 /* eslint-disable react-native/no-inline-styles */
-import React from 'react';
+import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
+import React, { useMemo } from 'react';
 import { View, ViewProps } from 'react-native';
 import { useTheme } from '~Utils';
 
 type Props = {
     width?: number;
     background?: string;
-    direction?: 'row' | 'column';
+    orientation?: 'row' | 'column';
     justify?:
         | 'flex-start'
         | 'flex-end'
@@ -16,17 +17,38 @@ type Props = {
     align?: 'flex-start' | 'flex-end' | 'center' | 'stretch' | 'baseline';
     mg?: [number, number, number, number];
     pd?: [number, number, number, number];
+    container?: boolean;
 } & ViewProps;
 
 export const CustomView = (props: Props) => {
     const { style, ...otherProps } = props;
     const theme = useTheme();
+    const bottom = useBottomTabBarHeight();
+
+    const getComputedPd = useMemo(() => {
+        if (props.pd && !props.container) {
+            return props.pd[2];
+        }
+
+        if (!props.pd && props.container) {
+            return bottom;
+        }
+
+        if (props.pd && props.container) {
+            return props.pd[2] + bottom;
+        }
+
+        return undefined;
+    }, [bottom, props.container, props.pd]);
 
     return (
         <View
             style={[
                 {
-                    flexDirection: props.direction ? props.direction : 'column',
+                    flex: props.container ? 1 : 0,
+                    flexDirection: props.orientation
+                        ? props.orientation
+                        : 'column',
                     justifyContent: props.justify ? props.justify : 'center',
                     alignItems: props.align ? props.align : 'center',
                     backgroundColor: props.background
@@ -39,7 +61,7 @@ export const CustomView = (props: Props) => {
                     marginLeft: props.mg && props.mg[3],
                     paddingTop: props.pd && props.pd[0],
                     paddingRight: props.pd && props.pd[1],
-                    paddingBottom: props.pd && props.pd[2],
+                    paddingBottom: getComputedPd,
                     paddingLeft: props.pd && props.pd[3],
                 },
                 style,
