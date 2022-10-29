@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 import {
     CustomIcon,
     CustomSafeArea,
@@ -12,12 +11,17 @@ import { useAppDispatch } from '~Storage/Redux';
 // import { createTodo, getTodo, getTodos } from '~Storage/Redux/Actions';
 // import { selectTodo, selectTodos } from '~Storage/Redux/Selectors';
 import { Constants } from '~Utils';
+import { realmContext, RMovie } from '~Storage/Realm';
+const { useRealm, useQuery } = realmContext;
 
 export const HomeScreen = () => {
-    const bottom = useBottomTabBarHeight();
-
-    const [show, setShow] = useState(false);
     const dispatch = useAppDispatch();
+    const realm = useRealm();
+
+    const allMovies = useQuery(RMovie);
+
+    const [movieId, setMovieId] = useState(0);
+    // const Rmovie = useObject(RMovie, movieId.toString());
 
     // const todo = useAppSelector(selectTodo);
     // const todos = useAppSelector(selectTodos);
@@ -39,13 +43,31 @@ export const HomeScreen = () => {
         //     }),
         // );
         // dispatch(getTodos('todos'));
-    }, [dispatch, show]);
+    }, [dispatch]);
+
+    const saveToRealm = () => {
+        let id = movieId + 1;
+        try {
+            realm.write(() => {
+                // eslint-disable-next-line no-new
+                new RMovie(realm, {
+                    id: id.toString(),
+                    title: `Random title ${id}`,
+                });
+            });
+            setMovieId(state => state + 1);
+        } catch (error) {
+            console.log('Could not save movie to realm');
+        }
+    };
 
     return (
         <CustomView
-            style={{ paddingBottom: bottom }}
+            container
+            flex
             background="pink"
-            mg={[10, 20, 10, 20]}>
+            justify="flex-start"
+            pd={[10, 20, 10, 20]}>
             <CustomStatusBar translucent />
             <CustomSafeArea />
 
@@ -60,13 +82,13 @@ export const HomeScreen = () => {
                 action={() => console.log('Test')}
             />
 
-            <TouchableOpacity
-                onPress={() => setShow(true)}
-                testID="toucheMeButton">
-                <CustomText font="body"> Touch me!</CustomText>
+            <TouchableOpacity onPress={saveToRealm} testID="toucheMeButton">
+                <CustomText font="body">Add movie</CustomText>
             </TouchableOpacity>
 
-            {show && <CustomText font="body">IM HERE</CustomText>}
+            {allMovies.map(movie => {
+                return <CustomText font="body">{movie.title}</CustomText>;
+            })}
         </CustomView>
     );
 };
