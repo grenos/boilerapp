@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import {
     CustomIcon,
     CustomSafeArea,
+    CustomScrollView,
     CustomStatusBar,
     CustomText,
     CustomView,
@@ -88,13 +89,15 @@ export const HomeScreen = () => {
                 <CustomText font="body">Add movie</CustomText>
             </TouchableOpacity>
 
-            {allMovies.map(movie => {
-                return (
-                    <CustomText font="body" key={movie.id}>
-                        {movie.title}
-                    </CustomText>
-                );
-            })}
+            <CustomScrollView>
+                {allMovies.map(movie => {
+                    return (
+                        <CustomText font="body" key={movie.id}>
+                            {movie.title}
+                        </CustomText>
+                    );
+                })}
+            </CustomScrollView>
         </CustomView>
     );
 };
