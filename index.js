@@ -4,13 +4,13 @@ import { AppRegistry, LogBox } from 'react-native';
 import { Provider } from 'react-redux';
 import App from './src/App';
 import { name as appName } from './app.json';
-import { realmContext } from '~Storage/Realm';
+import { OnDiskRealmProvider, InMemoryRealmProvider } from '~Storage/Realm';
 import { store } from '~Storage/Redux';
 import { NavigationContainer } from '@react-navigation/native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { useColorScheme, useTheme } from '~Utils';
 
-const { RealmProvider } = realmContext;
+// const { RealmProvider } = realmContext;
 
 LogBox.ignoreLogs(['The native module for Flipper', 'ViewPropTypes']);
 
@@ -35,11 +35,13 @@ const Main = () => {
     return (
         <Provider store={store}>
             <NavigationContainer theme={colorScheme}>
-                <RealmProvider>
-                    <SafeAreaProvider>
-                        <App />
-                    </SafeAreaProvider>
-                </RealmProvider>
+                <OnDiskRealmProvider>
+                    <InMemoryRealmProvider>
+                        <SafeAreaProvider>
+                            <App />
+                        </SafeAreaProvider>
+                    </InMemoryRealmProvider>
+                </OnDiskRealmProvider>
             </NavigationContainer>
         </Provider>
     );

@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import {
     CustomIcon,
     CustomSafeArea,
@@ -8,29 +8,33 @@ import {
     CustomView,
 } from '~Components';
 import { TouchableOpacity } from 'react-native';
-import { useAppDispatch } from '~Storage/Redux';
-// import { createTodo, getTodo, getTodos } from '~Storage/Redux/Actions';
-// import { selectTodo, selectTodos } from '~Storage/Redux/Selectors';
+import { useAppDispatch, useAppSelector } from '~Storage/Redux';
+import { createTodo, getTodo } from '~Storage/Redux/Actions';
+import { selectTodo } from '~Storage/Redux/Selectors';
 import { Constants } from '~Utils';
-import { realmContext, RMovie } from '~Storage/Realm';
+import {
+    useinMemoryRealm,
+    useOnDiskRealm,
+    useinMemoryQuery,
+    useOnDiskQuery,
+    RMovie,
+    RTodo,
+} from '~Storage/Realm';
 import { uniqueId } from 'lodash';
-const { useRealm, useQuery } = realmContext;
 
 export const HomeScreen = () => {
     const dispatch = useAppDispatch();
-    const realm = useRealm();
+    const realmMem = useinMemoryRealm();
+    const realmDisk = useOnDiskRealm();
 
-    const allMovies = useQuery(RMovie);
+    const allMovies = useOnDiskQuery(RMovie);
+    const allTodos = useinMemoryQuery(RTodo);
+
     // const Rmovie = useObject(RMovie, movieId.toString());
-
     // const todo = useAppSelector(selectTodo);
-    // const todos = useAppSelector(selectTodos);
+    // const { data, loading, error, isError } = useAppSelector(selectTodo);
 
-    // console.log('todo--------', todo);
-    // console.log('todos', todos);
-
-    useEffect(() => {
-        // dispatch(getTodo('todos/999'));
+    const addTodo = async () => {
         // dispatch(
         //     createTodo({
         //         endpoint: 'todos',
@@ -42,21 +46,36 @@ export const HomeScreen = () => {
         //         },
         //     }),
         // );
-        // dispatch(getTodos('todos'));
-    }, [dispatch]);
+
+        // dispatch(getTodo('todos/999'));
+
+        try {
+            realmMem.write(() => {
+                // eslint-disable-next-line no-new
+                new RTodo(realmMem, {
+                    completed: false,
+                    id: 999,
+                    title: 'delectus aut autem',
+                    userId: 999,
+                });
+            });
+        } catch (_error) {
+            console.log('Could not save todo to realm', _error);
+        }
+    };
 
     const saveToRealm = () => {
         try {
-            let id = uniqueId();
-            realm.write(() => {
+            let id = uniqueId('for movie ');
+            realmDisk.write(() => {
                 // eslint-disable-next-line no-new
-                new RMovie(realm, {
+                new RMovie(realmDisk, {
                     id,
                     title: `Random title ${id}`,
                 });
             });
-        } catch (error) {
-            console.log('Could not save movie to realm', error);
+        } catch (_error) {
+            console.log('Could not save movie to realm', _error);
         }
     };
 
@@ -84,6 +103,14 @@ export const HomeScreen = () => {
             <TouchableOpacity onPress={saveToRealm} testID="toucheMeButton">
                 <CustomText font="body">Add movie</CustomText>
             </TouchableOpacity>
+
+            <TouchableOpacity onPress={addTodo}>
+                <CustomText font="body">Add Todo</CustomText>
+            </TouchableOpacity>
+
+            <CustomView>
+                <CustomText font="body">{allTodos[0]?.title}</CustomText>
+            </CustomView>
 
             <CustomScrollView>
                 {allMovies.map(movie => {
