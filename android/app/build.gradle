@@ -135,6 +135,7 @@ project.ext.vectoricons = [
 
 apply from: "../../node_modules/react-native-vector-icons/fonts.gradle"
 
+
 android {
     ndkVersion rootProject.ext.ndkVersion
 
@@ -149,16 +150,16 @@ android {
         buildConfigField "boolean", "IS_NEW_ARCHITECTURE_ENABLED", isNewArchitectureEnabled().toString()
 
         if (isNewArchitectureEnabled()) {
-            // We configure the NDK build only if you decide to opt-in for the New Architecture.
+            // We configure the CMake build only if you decide to opt-in for the New Architecture.
             externalNativeBuild {
-                    cmake {
-                        arguments "-DPROJECT_BUILD_DIR=$buildDir",
-                            "-DREACT_ANDROID_DIR=$rootDir/../node_modules/react-native/ReactAndroid",
-                            "-DREACT_ANDROID_BUILD_DIR=$rootDir/../node_modules/react-native/ReactAndroid/build",
-                            "-DNODE_MODULES_DIR=$rootDir/../node_modules",
-                            "-DANDROID_STL=c++_shared"
-                    }
+                cmake {
+                    arguments "-DPROJECT_BUILD_DIR=$buildDir",
+                        "-DREACT_ANDROID_DIR=$rootDir/../node_modules/react-native/ReactAndroid",
+                        "-DREACT_ANDROID_BUILD_DIR=$rootDir/../node_modules/react-native/ReactAndroid/build",
+                        "-DNODE_MODULES_DIR=$rootDir/../node_modules",
+                        "-DANDROID_STL=c++_shared"
                 }
+            }
             if (!enableSeparateBuildPerCPUArchitecture) {
                 ndk {
                     abiFilters (*reactNativeArchitectures())
@@ -193,15 +194,15 @@ android {
             preReleaseBuild.dependsOn(packageReactNdkReleaseLibs)
 
             // Due to a bug inside AGP, we have to explicitly set a dependency
-            // between configureNdkBuild* tasks and the preBuild tasks.
+            // between configureCMakeDebug* tasks and the preBuild tasks.
             // This can be removed once this is solved: https://issuetracker.google.com/issues/207403732
-            configureNdkBuildRelease.dependsOn(preReleaseBuild)
-            configureNdkBuildDebug.dependsOn(preDebugBuild)
+            configureCMakeRelWithDebInfo.dependsOn(preReleaseBuild)
+            configureCMakeDebug.dependsOn(preDebugBuild)
             reactNativeArchitectures().each { architecture ->
-                tasks.findByName("configureNdkBuildDebug[${architecture}]")?.configure {
+                tasks.findByName("configureCMakeDebug[${architecture}]")?.configure {
                     dependsOn("preDebugBuild")
                 }
-                tasks.findByName("configureNdkBuildRelease[${architecture}]")?.configure {
+                tasks.findByName("configureCMakeRelWithDebInfo[${architecture}]")?.configure {
                     dependsOn("preReleaseBuild")
                 }
             }

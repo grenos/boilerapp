@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import {
     CustomIcon,
     CustomSafeArea,
@@ -13,6 +13,7 @@ import { useAppDispatch } from '~Storage/Redux';
 // import { selectTodo, selectTodos } from '~Storage/Redux/Selectors';
 import { Constants } from '~Utils';
 import { realmContext, RMovie } from '~Storage/Realm';
+import { uniqueId } from 'lodash';
 const { useRealm, useQuery } = realmContext;
 
 export const HomeScreen = () => {
@@ -20,10 +21,6 @@ export const HomeScreen = () => {
     const realm = useRealm();
 
     const allMovies = useQuery(RMovie);
-
-    const [movieId, setMovieId] = useState(
-        parseInt(allMovies[allMovies?.length - 1].id, 10),
-    );
     // const Rmovie = useObject(RMovie, movieId.toString());
 
     // const todo = useAppSelector(selectTodo);
@@ -49,16 +46,15 @@ export const HomeScreen = () => {
     }, [dispatch]);
 
     const saveToRealm = () => {
-        let id = movieId + 1;
         try {
+            let id = uniqueId();
             realm.write(() => {
                 // eslint-disable-next-line no-new
                 new RMovie(realm, {
-                    id: id.toString(),
+                    id,
                     title: `Random title ${id}`,
                 });
             });
-            setMovieId(state => state + 1);
         } catch (error) {
             console.log('Could not save movie to realm', error);
         }

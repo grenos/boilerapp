@@ -29,6 +29,6 @@ describe('Example', () => {
 
     it('should show hello screen after tap', async () => {
         await element(by.id('toucheMeButton')).tap();
-        await expect(element(by.text('IM HERE'))).toBeVisible();
+        await expect(element(by.text('Random title 1'))).toBeVisible();
     });
 });
